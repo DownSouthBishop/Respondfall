@@ -1,250 +1,259 @@
-import React, { useState } from 'react';
-import { ChevronRight, AlertCircle } from 'lucide-react';
+'use client';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+const T = '#00b4d8';
+const BG = '#0d1117';
+const CARD = '#161b22';
+const BORDER = '#30363d';
+const MUTED = '#8b949e';
+const FG = '#e6edf3';
+
+interface StepData {
+  email: string;
+  password: string;
+  full_name: string;
+  business_name: string;
+  business_phone: string;
+  plan: string;
+}
+
+const PLANS = [
+  { id: 'starter', label: 'Starter', price: '$97/mo', features: ['Up to 3 clients', 'Booking recovery SMS', 'AI intent classification'] },
+  { id: 'pro', label: 'Pro', price: '$247/mo', features: ['Up to 10 clients', 'All Starter features', 'Review & referral sequences', 'Analytics dashboard'] },
+  { id: 'agency', label: 'Agency', price: '$497/mo', features: ['Unlimited clients', 'All Pro features', 'White-label reporting', 'Priority support'] },
+];
 
 export default function SignupPage() {
+  const router = useRouter();
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    businessName: '',
-    businessPhone: '',
-    ownerEmail: '',
-    tier: 'pro',
-    password: '',
-    agreeTerms: false
-  });
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<StepData>({
+    email: '',
+    password: '',
+    full_name: '',
+    business_name: '',
+    business_phone: '',
+    plan: 'pro',
+  });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type, checked } = e.target as any;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
-    });
-  };
+  function update(key: keyof StepData, value: string) {
+    setData(prev => ({ ...prev, [key]: value }));
+  }
 
-  const handleStepOne = () => {
-    if (!formData.businessName || !formData.businessPhone || !formData.ownerEmail) {
-      setError('Please fill in all fields');
-      return;
-    }
+  function validateStep1() {
+    if (!data.full_name.trim()) return 'Full name is required';
+    if (!data.email.trim() || !data.email.includes('@')) return 'Valid email is required';
+    if (data.password.length < 8) return 'Password must be at least 8 characters';
+    return '';
+  }
+
+  function validateStep2() {
+    if (!data.business_name.trim()) return 'Business name is required';
+    return '';
+  }
+
+  async function handleSubmit() {
     setError('');
-    setStep(2);
-  };
-
-  const handleStepTwo = () => {
-    if (!formData.password || formData.password.length < 8) {
-      setError('Password must be at least 8 characters');
-      return;
-    }
-    if (!formData.agreeTerms) {
-      setError('You must agree to terms and conditions');
-      return;
-    }
-    setError('');
-    handleSubmit();
-  };
-
-  const handleSubmit = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/auth/signup', {
+      const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(data),
       });
-
-      if (response.ok) {
-        setStep(3);
-      } else {
-        setError('Signup failed. Please try again.');
-      }
-    } catch (err) {
-      setError('An error occurred. Please try again.');
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? 'Signup failed');
+      router.push('/dashboard');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Something went wrong');
     } finally {
       setLoading(false);
     }
+  }
+
+  const inputStyle = {
+    width: '100%',
+    padding: '10px 12px',
+    background: BG,
+    border: `1px solid ${BORDER}`,
+    borderRadius: 6,
+    color: FG,
+    fontSize: 14,
+    outline: 'none',
+    boxSizing: 'border-box' as const,
+  };
+
+  const labelStyle = {
+    display: 'block' as const,
+    fontSize: 12,
+    fontWeight: 600 as const,
+    color: MUTED,
+    marginBottom: 6,
+    letterSpacing: 0.5,
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <nav className="border-b border-slate-700/50 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <a href="/" className="text-2xl font-bold text-white">Respondfall</a>
-        </div>
-      </nav>
+    <div style={{ minHeight: '100vh', background: BG, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 16px', fontFamily: "'Inter', system-ui, sans-serif" }}>
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="flex items-center justify-between mb-12">
-          <div className={`flex-1 h-2 rounded-full ${step >= 1 ? 'bg-green-400' : 'bg-slate-700'}`}></div>
-          <div className="px-4 text-center text-slate-400">Step {step} of 3</div>
-          <div className={`flex-1 h-2 rounded-full ${step >= 2 ? 'bg-green-400' : 'bg-slate-700'}`}></div>
-          <div className="px-4 text-center text-slate-400">4 min setup</div>
-          <div className={`flex-1 h-2 rounded-full ${step >= 3 ? 'bg-green-400' : 'bg-slate-700'}`}></div>
+      {/* Logo */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2C9 2 6 4 5 7L3 15l3-1 1 3 5-3 5 3 1-3 3 1-2-8c-1-3-4-5-7-5z" fill={T} />
+          <circle cx="9" cy="10" r="1.5" fill={BG} />
+          <circle cx="15" cy="10" r="1.5" fill={BG} />
+        </svg>
+        <div>
+          <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: 1.5, color: FG }}>RESPONDFALL</div>
+          <div style={{ fontSize: 10, color: MUTED, letterSpacing: 1 }}>MISSED CALL REVENUE RECOVERY</div>
         </div>
+      </div>
+
+      {/* Progress steps */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 32 }}>
+        {[1, 2, 3].map((n, i) => (
+          <>
+            <div
+              key={n}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                background: step >= n ? T : CARD,
+                border: `2px solid ${step >= n ? T : BORDER}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 13,
+                fontWeight: 700,
+                color: step >= n ? '#000' : MUTED,
+              }}
+            >
+              {step > n ? '✓' : n}
+            </div>
+            {i < 2 && (
+              <div
+                key={`line-${n}`}
+                style={{ width: 48, height: 2, background: step > n ? T : BORDER }}
+              />
+            )}
+          </>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: 0, marginBottom: 32, width: 144, justifyContent: 'space-between' }}>
+        {['Account', 'Business', 'Plan'].map((label, i) => (
+          <div key={label} style={{ fontSize: 10, color: step >= i + 1 ? T : MUTED, fontWeight: 600, textAlign: 'center', width: 48 }}>{label}</div>
+        ))}
+      </div>
+
+      {/* Card */}
+      <div style={{ width: '100%', maxWidth: 440, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: '28px 32px' }}>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 mb-8 flex items-start space-x-3">
-            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-            <p className="text-red-300">{error}</p>
-          </div>
+          <div style={{ padding: '10px 12px', background: '#ff000022', border: '1px solid #ff000044', borderRadius: 6, color: '#ff6b6b', fontSize: 13, marginBottom: 20 }}>{error}</div>
         )}
 
+        {/* Step 1: Account */}
         {step === 1 && (
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-8 mb-8">
-            <h2 className="text-2xl font-bold text-white mb-2">Business Information</h2>
-            <p className="text-slate-400 mb-6">We'll use this to set up your account.</p>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Business Name</label>
-                <input
-                  type="text"
-                  name="businessName"
-                  value={formData.businessName}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Miami HVAC Solutions"
-                  className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-green-400"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Current Business Phone</label>
-                <input
-                  type="tel"
-                  name="businessPhone"
-                  value={formData.businessPhone}
-                  onChange={handleInputChange}
-                  placeholder="(555) 123-4567"
-                  className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-green-400"
-                />
-                <p className="text-xs text-slate-500 mt-2">We'll create a new number that forwards to this one.</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Your Email</label>
-                <input
-                  type="email"
-                  name="ownerEmail"
-                  value={formData.ownerEmail}
-                  onChange={handleInputChange}
-                  placeholder="you@business.com"
-                  className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-green-400"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Choose Your Plan</label>
-                <select
-                  name="tier"
-                  value={formData.tier}
-                  onChange={handleInputChange}
-                  className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-400"
-                >
-                  <option value="starter">Starter - $97/month</option>
-                  <option value="pro">Pro - $197/month (Recommended)</option>
-                  <option value="agency">Agency - $397/month</option>
-                </select>
-              </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Create your account</div>
+            <div>
+              <label style={labelStyle}>Full Name</label>
+              <input type="text" value={data.full_name} onChange={e => update('full_name', e.target.value)} placeholder="Jane Smith" style={inputStyle} />
             </div>
-
+            <div>
+              <label style={labelStyle}>Email Address</label>
+              <input type="email" value={data.email} onChange={e => update('email', e.target.value)} placeholder="jane@example.com" style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Password</label>
+              <input type="password" value={data.password} onChange={e => update('password', e.target.value)} placeholder="Min 8 characters" style={inputStyle} />
+            </div>
             <button
-              onClick={handleStepOne}
-              className="w-full mt-8 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg flex items-center justify-center space-x-2 transition"
+              onClick={() => { const err = validateStep1(); if (err) { setError(err); return; } setError(''); setStep(2); }}
+              style={{ padding: '11px', background: T, border: 'none', borderRadius: 6, color: '#000', fontWeight: 700, fontSize: 14, cursor: 'pointer', marginTop: 4 }}
             >
-              <span>Continue</span>
-              <ChevronRight className="w-5 h-5" />
+              Continue
             </button>
           </div>
         )}
 
+        {/* Step 2: Business */}
         {step === 2 && (
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-8 mb-8">
-            <h2 className="text-2xl font-bold text-white mb-2">Secure Your Account</h2>
-            <p className="text-slate-400 mb-6">Create a password and agree to our terms.</p>
-
-            <div className="space-y-4 mb-8">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  placeholder="Min. 8 characters"
-                  className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-green-400"
-                />
-              </div>
-
-              <div className="flex items-start space-x-3">
-                <input
-                  type="checkbox"
-                  name="agreeTerms"
-                  checked={formData.agreeTerms}
-                  onChange={handleInputChange}
-                  className="mt-1"
-                />
-                <label className="text-sm text-slate-300">
-                  I agree to Respondfall's Terms of Service and Privacy Policy
-                </label>
-              </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Your business info</div>
+            <div>
+              <label style={labelStyle}>Business Name</label>
+              <input type="text" value={data.business_name} onChange={e => update('business_name', e.target.value)} placeholder="Premier Plumbing Co." style={inputStyle} />
             </div>
-
-            <div className="flex space-x-4">
+            <div>
+              <label style={labelStyle}>Business Phone (optional)</label>
+              <input type="tel" value={data.business_phone} onChange={e => update('business_phone', e.target.value)} placeholder="+15551234567" style={inputStyle} />
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => { setError(''); setStep(1); }} style={{ flex: 1, padding: '11px', background: 'none', border: `1px solid ${BORDER}`, borderRadius: 6, color: MUTED, fontSize: 14, cursor: 'pointer' }}>Back</button>
               <button
-                onClick={() => setStep(1)}
-                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition"
+                onClick={() => { const err = validateStep2(); if (err) { setError(err); return; } setError(''); setStep(3); }}
+                style={{ flex: 2, padding: '11px', background: T, border: 'none', borderRadius: 6, color: '#000', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
               >
-                Back
-              </button>
-              <button
-                onClick={handleStepTwo}
-                disabled={loading}
-                className="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-slate-500 text-white font-bold py-3 rounded-lg flex items-center justify-center space-x-2 transition"
-              >
-                <span>{loading ? 'Creating Account...' : 'Create Account'}</span>
-                {!loading && <ChevronRight className="w-5 h-5" />}
+                Continue
               </button>
             </div>
           </div>
         )}
 
+        {/* Step 3: Plan */}
         {step === 3 && (
-          <div className="bg-slate-800/50 border border-green-400/50 rounded-lg p-8 text-center mb-8">
-            <div className="w-16 h-16 bg-green-400/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Choose your plan</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {PLANS.map(plan => (
+                <button
+                  key={plan.id}
+                  onClick={() => update('plan', plan.id)}
+                  style={{
+                    padding: '14px 16px',
+                    background: data.plan === plan.id ? `${T}18` : BG,
+                    border: `2px solid ${data.plan === plan.id ? T : BORDER}`,
+                    borderRadius: 8,
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <span style={{ fontWeight: 700, fontSize: 14, color: FG }}>{plan.label}</span>
+                    <span style={{ fontWeight: 700, fontSize: 14, color: data.plan === plan.id ? T : MUTED }}>{plan.price}</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    {plan.features.map(f => (
+                      <div key={f} style={{ fontSize: 11, color: MUTED, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <span style={{ color: data.plan === plan.id ? T : MUTED }}>✓</span> {f}
+                      </div>
+                    ))}
+                  </div>
+                </button>
+              ))}
             </div>
-
-            <h2 className="text-2xl font-bold text-white mb-2">Account Created!</h2>
-            <p className="text-slate-300 mb-4">Your Respondfall account is ready. We're provisioning your phone number now.</p>
-
-            <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4 mb-6 text-left">
-              <p className="text-sm text-slate-400 mb-2">What happens next:</p>
-              <ol className="text-sm text-slate-300 space-y-2">
-                <li>✓ New local number created and forwarding set up</li>
-                <li>✓ SMS sequences activated</li>
-                <li>✓ Dashboard ready to view incoming calls</li>
-                <li>✓ 15-day free trial starts now</li>
-              </ol>
+            <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+              <button onClick={() => { setError(''); setStep(2); }} style={{ flex: 1, padding: '11px', background: 'none', border: `1px solid ${BORDER}`, borderRadius: 6, color: MUTED, fontSize: 14, cursor: 'pointer' }}>Back</button>
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                style={{ flex: 2, padding: '11px', background: T, border: 'none', borderRadius: 6, color: '#000', fontWeight: 700, fontSize: 14, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1 }}
+              >
+                {loading ? 'Creating account…' : 'Start Free Trial'}
+              </button>
             </div>
-
-            <p className="text-slate-400 text-sm mb-6">You'll receive an email confirmation and your dashboard login within 1 minute.</p>
-
-            
-              href="/dashboard"
-              className="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition"
-            >
-              Go to Dashboard
-            </a>
+            <div style={{ fontSize: 11, color: MUTED, textAlign: 'center' }}>14-day free trial · No credit card required</div>
           </div>
         )}
+      </div>
 
-        <div className="bg-blue-500/10 border border-blue-500/50 rounded-lg p-6">
-          <p className="text-blue-200 text-sm">
-            <strong>Free trial includes:</strong> Full access to your plan, local number provisioning, SMS sequences, and analytics. No credit card charged until day 15.
-          </p>
-        </div>
+      {/* Footer */}
+      <div style={{ marginTop: 24, textAlign: 'center' }}>
+        <div style={{ fontSize: 12, color: MUTED }}>Already have an account? <a href="/" style={{ color: T, textDecoration: 'none' }}>Sign in</a></div>
+        <div style={{ fontSize: 11, color: MUTED, marginTop: 8, opacity: 0.6 }}>Powered by SkyforgeAI · Enterprise-Grade Infrastructure</div>
       </div>
     </div>
   );
