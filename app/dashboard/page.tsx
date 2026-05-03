@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { ConnectTab } from './connect-tab';
 
 const T = '#00b4d8';
 const BG = '#0d1117';
@@ -101,7 +102,6 @@ export default function DashboardPage() {
   const [jobDone, setJobDone] = useState(false);
   const [settingsForm, setSettingsForm] = useState({ booking_link: '', google_review_link: '', job_value: '', blackout_start: '', blackout_end: '', system_active: true });
 
-  // Load clients
   useEffect(() => {
     fetch('/api/clients')
       .then(r => r.ok ? r.json() : Promise.reject())
@@ -122,7 +122,6 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Load client data when active client changes
   const loadClientData = useCallback((client: Client) => {
     if (client.id.startsWith('demo-')) return;
     Promise.all([
@@ -132,10 +131,7 @@ export default function DashboardPage() {
     ]).then(([s, a, c]) => {
       if (s?.missedToday !== undefined) setStats(s);
       if (a?.events?.length) setActivity(a.events);
-      if (c?.conversations?.length) {
-        setConvos(c.conversations);
-        setActiveConvo(c.conversations[0]);
-      }
+      if (c?.conversations?.length) { setConvos(c.conversations); setActiveConvo(c.conversations[0]); }
     });
   }, []);
 
@@ -205,7 +201,6 @@ export default function DashboardPage() {
     if (!addForm.area_code.match(/^\d{3}$/)) { setAddError('Area code must be 3 digits'); return; }
     setAddStep('provisioning');
     try {
-      // Provision number
       const numRes = await fetch('/api/clients/provision-number', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -214,7 +209,6 @@ export default function DashboardPage() {
       const numData = await numRes.json();
       if (!numRes.ok) throw new Error(numData.error ?? 'Failed to provision number');
 
-      // Create client
       const clientRes = await fetch('/api/clients', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -288,7 +282,6 @@ export default function DashboardPage() {
 
       {/* Sidebar */}
       <div style={{ width: 220, minHeight: '100vh', background: CARD, borderRight: `1px solid ${BORDER}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-        {/* Logo */}
         <div style={{ padding: '20px 16px 16px', borderBottom: `1px solid ${BORDER}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -303,7 +296,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Client list */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '12px 0' }}>
           <div style={{ padding: '0 16px 8px', fontSize: 10, fontWeight: 600, letterSpacing: 1, color: MUTED, textTransform: 'uppercase' }}>Client Accounts</div>
           {clients.map(client => {
@@ -312,50 +304,28 @@ export default function DashboardPage() {
               <button
                 key={client.id}
                 onClick={() => setActiveClient(client)}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '8px 16px',
-                  background: isActive ? `${T}18` : 'none',
-                  border: 'none',
-                  borderLeft: isActive ? `2px solid ${T}` : '2px solid transparent',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px', background: isActive ? `${T}18` : 'none', border: 'none', borderLeft: isActive ? `2px solid ${T}` : '2px solid transparent', cursor: 'pointer', textAlign: 'left' }}
               >
                 <div style={{ width: 32, height: 32, borderRadius: 8, background: isActive ? T : BORDER, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: isActive ? '#000' : FG, flexShrink: 0 }}>
                   {initials(client.business_name)}
                 </div>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 12, fontWeight: 600, color: FG, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{client.business_name}</div>
-                  <div style={{ fontSize: 10, color: client.system_active ? GREEN : MUTED }}>
-                    {client.system_active ? '● Active' : '○ Paused'}
-                  </div>
+                  <div style={{ fontSize: 10, color: client.system_active ? GREEN : MUTED }}>{client.system_active ? '● Active' : '○ Paused'}</div>
                 </div>
               </button>
             );
           })}
           <div style={{ padding: '8px 16px' }}>
-            <button
-              onClick={() => setShowAdd(true)}
-              style={{ width: '100%', padding: '7px', background: 'none', border: `1px dashed ${BORDER}`, borderRadius: 6, color: MUTED, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
-            >
+            <button onClick={() => setShowAdd(true)} style={{ width: '100%', padding: '7px', background: 'none', border: `1px dashed ${BORDER}`, borderRadius: 6, color: MUTED, fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
               <span style={{ fontSize: 16, lineHeight: 1 }}>+</span> Add Client
             </button>
           </div>
         </div>
 
-        {/* Footer */}
         <div style={{ padding: '12px 16px', borderTop: `1px solid ${BORDER}` }}>
           <div style={{ fontSize: 11, color: MUTED, marginBottom: 8 }}>Agency Owner</div>
-          <button
-            onClick={handleLogout}
-            style={{ width: '100%', padding: '7px', background: 'none', border: `1px solid ${BORDER}`, borderRadius: 6, color: MUTED, fontSize: 12, cursor: 'pointer' }}
-          >
-            Logout
-          </button>
+          <button onClick={handleLogout} style={{ width: '100%', padding: '7px', background: 'none', border: `1px solid ${BORDER}`, borderRadius: 6, color: MUTED, fontSize: 12, cursor: 'pointer' }}>Logout</button>
         </div>
       </div>
 
@@ -363,7 +333,6 @@ export default function DashboardPage() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {activeClient && (
           <>
-            {/* Client header */}
             <div style={{ padding: '16px 24px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
               <div>
                 <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>{activeClient.business_name}</h1>
@@ -373,16 +342,12 @@ export default function DashboardPage() {
                 <span style={{ padding: '4px 12px', background: `${GREEN}22`, border: `1px solid ${GREEN}44`, borderRadius: 20, fontSize: 12, fontWeight: 600, color: GREEN }}>
                   {activeClient.system_active ? '● SYSTEM ACTIVE' : '○ PAUSED'}
                 </span>
-                <button
-                  onClick={handleMarkJobComplete}
-                  style={{ padding: '6px 14px', background: jobDone ? GREEN : ORANGE, border: 'none', borderRadius: 6, color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
-                >
+                <button onClick={handleMarkJobComplete} style={{ padding: '6px 14px', background: jobDone ? GREEN : ORANGE, border: 'none', borderRadius: 6, color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
                   {jobDone ? '✓ Scheduled!' : 'Mark Job Complete'}
                 </button>
               </div>
             </div>
 
-            {/* Stats */}
             <div style={{ display: 'flex', gap: 16, padding: '16px 24px', flexWrap: 'wrap' }}>
               {[
                 { label: 'MISSED TODAY', value: stats.missedToday, color: FG },
@@ -397,7 +362,6 @@ export default function DashboardPage() {
               ))}
             </div>
 
-            {/* Tabs */}
             <div style={{ display: 'flex', borderBottom: `1px solid ${BORDER}`, padding: '0 24px', overflowX: 'auto' }}>
               {tabBtn('activity', 'Activity')}
               {tabBtn('inbox', 'Inbox', unreadCount || undefined)}
@@ -407,21 +371,17 @@ export default function DashboardPage() {
               {tabBtn('connect', 'Connect')}
             </div>
 
-            {/* Tab content */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
 
-              {/* Activity */}
               {tab === 'activity' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {activity.length === 0 && <div style={{ color: MUTED, fontSize: 13 }}>No activity yet.</div>}
                   {activity.map(ev => (
                     <div key={ev.id} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 8, padding: '12px 16px', display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                      <div style={{ fontSize: 18, flexShrink: 0 }}>
-                        {ev.type === 'missed_call' ? '📞' : ev.direction === 'inbound' ? '💬' : '📤'}
-                      </div>
+                      <div style={{ fontSize: 18, flexShrink: 0 }}>{ev.type === 'missed_call' ? '📞' : ev.direction === 'inbound' ? '💬' : '📤'}</div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 2 }}>
-                          {ev.type === 'missed_call' ? `Missed call from ${ev.caller_phone}` : (ev.direction === 'inbound' ? `Reply from ${ev.caller_phone}` : 'SMS sent')}
+                          {ev.type === 'missed_call' ? `Missed call from ${ev.caller_phone}` : ev.direction === 'inbound' ? `Reply from ${ev.caller_phone}` : 'SMS sent'}
                         </div>
                         {ev.body && <div style={{ fontSize: 12, color: MUTED, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ev.body}</div>}
                       </div>
@@ -431,16 +391,11 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              {/* Inbox */}
               {tab === 'inbox' && (
                 <div style={{ display: 'flex', gap: 16, height: 500 }}>
                   <div style={{ width: 240, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
                     {convos.map(c => (
-                      <button
-                        key={c.phone}
-                        onClick={() => setActiveConvo(c)}
-                        style={{ padding: '10px 12px', background: activeConvo?.phone === c.phone ? `${T}18` : CARD, border: `1px solid ${activeConvo?.phone === c.phone ? T : BORDER}`, borderRadius: 8, cursor: 'pointer', textAlign: 'left' }}
-                      >
+                      <button key={c.phone} onClick={() => setActiveConvo(c)} style={{ padding: '10px 12px', background: activeConvo?.phone === c.phone ? `${T}18` : CARD, border: `1px solid ${activeConvo?.phone === c.phone ? T : BORDER}`, borderRadius: 8, cursor: 'pointer', textAlign: 'left' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <span style={{ fontSize: 13, fontWeight: 600, color: FG }}>{c.phone}</span>
                           {c.unread > 0 && <span style={{ background: T, color: '#000', borderRadius: 10, padding: '1px 6px', fontSize: 10, fontWeight: 700 }}>{c.unread}</span>}
@@ -466,11 +421,10 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              {/* Sequences */}
               {tab === 'sequences' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {[
-                    { name: 'Booking Recovery', trigger: 'Missed call → immediate', steps: ['SMS 1: immediate — catch caller, offer booking link', 'SMS 2: +15 min — follow-up if no reply', 'SMS 3: +2 hrs — final gentle nudge'], color: T },
+                    { name: 'Booking Recovery', trigger: 'Missed call → immediate + follow-ups', steps: ['SMS 1: immediate — catch caller, offer booking link', 'SMS 2: +2 hrs if no reply — follow-up', 'SMS 3: +24 hrs if no reply — final nudge'], color: T },
                     { name: 'Review Request', trigger: 'Job complete → +2 hours', steps: ['SMS: Google review request with direct link'], color: GREEN },
                     { name: 'Referral Ask', trigger: 'Job complete → +30 minutes', steps: ['SMS: Ask satisfied customer for referral'], color: ORANGE },
                   ].map(seq => (
@@ -493,7 +447,6 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              {/* Analytics */}
               {tab === 'analytics' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                   <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
@@ -516,7 +469,6 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              {/* Settings */}
               {tab === 'settings' && (
                 <div style={{ maxWidth: 520 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -539,13 +491,7 @@ export default function DashboardPage() {
                       </div>
                     ))}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <input
-                        type="checkbox"
-                        checked={settingsForm.system_active}
-                        onChange={e => setSettingsForm(prev => ({ ...prev, system_active: e.target.checked }))}
-                        id="sys-active"
-                        style={{ width: 16, height: 16, accentColor: T, cursor: 'pointer' }}
-                      />
+                      <input type="checkbox" checked={settingsForm.system_active} onChange={e => setSettingsForm(prev => ({ ...prev, system_active: e.target.checked }))} id="sys-active" style={{ width: 16, height: 16, accentColor: T, cursor: 'pointer' }} />
                       <label htmlFor="sys-active" style={{ fontSize: 13, color: FG, cursor: 'pointer' }}>System Active (SMS automation enabled)</label>
                     </div>
                     <button
@@ -560,29 +506,8 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              {/* Connect */}
               {tab === 'connect' && (
-                <div style={{ maxWidth: 520, display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 8, padding: '20px' }}>
-                    <div style={{ fontWeight: 700, marginBottom: 12, fontSize: 14 }}>Twilio Connection</div>
-                    <div style={{ fontSize: 12, color: MUTED, marginBottom: 8 }}>Your Respondfall number routes missed calls through Twilio. Each client gets a dedicated local number.</div>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <div style={{ padding: '4px 10px', background: `${GREEN}22`, border: `1px solid ${GREEN}44`, borderRadius: 4, fontSize: 11, color: GREEN, fontWeight: 600 }}>CONNECTED</div>
-                    </div>
-                  </div>
-                  <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 8, padding: '20px' }}>
-                    <div style={{ fontWeight: 700, marginBottom: 12, fontSize: 14 }}>n8n Automation</div>
-                    <div style={{ fontSize: 12, color: MUTED, marginBottom: 8 }}>Missed call events are forwarded to n8n for additional automation workflows.</div>
-                    <div style={{ fontSize: 12, color: MUTED }}>Webhook URL: <code style={{ background: BG, padding: '2px 6px', borderRadius: 4 }}>{process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL ?? 'Configure N8N_WEBHOOK_URL'}</code></div>
-                  </div>
-                  <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 8, padding: '20px' }}>
-                    <div style={{ fontWeight: 700, marginBottom: 12, fontSize: 14 }}>Stripe Billing</div>
-                    <div style={{ fontSize: 12, color: MUTED, marginBottom: 8 }}>Subscription management via Stripe. Webhooks handle plan changes automatically.</div>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <div style={{ padding: '4px 10px', background: `${T}22`, border: `1px solid ${T}44`, borderRadius: 4, fontSize: 11, color: T, fontWeight: 600 }}>CONFIGURE IN ENV</div>
-                    </div>
-                  </div>
-                </div>
+                <ConnectTab twilioNumber={activeClient.twilio_number} />
               )}
 
             </div>
@@ -609,13 +534,7 @@ export default function DashboardPage() {
                   ].map(f => (
                     <div key={f.key}>
                       <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: MUTED, marginBottom: 4 }}>{f.label}</label>
-                      <input
-                        type="text"
-                        value={(addForm as Record<string, string>)[f.key]}
-                        onChange={e => setAddForm(prev => ({ ...prev, [f.key]: e.target.value }))}
-                        placeholder={f.placeholder}
-                        style={{ width: '100%', padding: '8px 10px', background: BG, border: `1px solid ${BORDER}`, borderRadius: 6, color: FG, fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
-                      />
+                      <input type="text" value={(addForm as Record<string, string>)[f.key]} onChange={e => setAddForm(prev => ({ ...prev, [f.key]: e.target.value }))} placeholder={f.placeholder} style={{ width: '100%', padding: '8px 10px', background: BG, border: `1px solid ${BORDER}`, borderRadius: 6, color: FG, fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
                     </div>
                   ))}
                 </div>
