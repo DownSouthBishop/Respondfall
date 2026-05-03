@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { ChevronRight, AlertCircle } from 'lucide-react';
 
@@ -231,7 +233,7 @@ export default function SignupPage() {
 
             <p className="text-slate-400 text-sm mb-6">You'll receive an email confirmation and your dashboard login within 1 minute.</p>
 
-            
+            <a
               href="/dashboard"
               className="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition"
             >

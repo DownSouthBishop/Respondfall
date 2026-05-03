@@ -1,251 +1,161 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ChevronRight, AlertCircle } from 'lucide-react';
+import React from 'react';
+import { ChevronRight, Phone, MessageSquare, TrendingUp, Shield } from 'lucide-react';
 
-export default function SignupPage() {
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    businessName: '',
-    businessPhone: '',
-    ownerEmail: '',
-    tier: 'pro',
-    password: '',
-    agreeTerms: false
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type, checked } = e.target as any;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
-    });
-  };
-
-  const handleStepOne = () => {
-    if (!formData.businessName || !formData.businessPhone || !formData.ownerEmail) {
-      setError('Please fill in all fields');
-      return;
-    }
-    setError('');
-    setStep(2);
-  };
-
-  const handleStepTwo = () => {
-    if (!formData.password || formData.password.length < 8) {
-      setError('Password must be at least 8 characters');
-      return;
-    }
-    if (!formData.agreeTerms) {
-      setError('You must agree to terms and conditions');
-      return;
-    }
-    setError('');
-    handleSubmit();
-  };
-
-  const handleSubmit = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-
-      if (response.ok) {
-        setStep(3);
-      } else {
-        setError('Signup failed. Please try again.');
-      }
-    } catch (err) {
-      setError('An error occurred. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <nav className="border-b border-slate-700/50 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <a href="/" className="text-2xl font-bold text-white">Respondfall</a>
+      {/* Nav */}
+      <nav className="border-b border-slate-700/50 backdrop-blur sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <div className="text-2xl font-bold text-white">Respondfall</div>
+          <div className="flex items-center space-x-4">
+            <a href="/dashboard" className="text-slate-300 hover:text-white transition text-sm">Dashboard</a>
+            <a
+              href="/signup"
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-5 rounded-lg transition text-sm flex items-center space-x-1"
+            >
+              <span>Start Free Trial</span>
+              <ChevronRight className="w-4 h-4" />
+            </a>
+          </div>
         </div>
       </nav>
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="flex items-center justify-between mb-12">
-          <div className={`flex-1 h-2 rounded-full ${step >= 1 ? 'bg-green-400' : 'bg-slate-700'}`}></div>
-          <div className="px-4 text-center text-slate-400">Step {step} of 3</div>
-          <div className={`flex-1 h-2 rounded-full ${step >= 2 ? 'bg-green-400' : 'bg-slate-700'}`}></div>
-          <div className="px-4 text-center text-slate-400">4 min setup</div>
-          <div className={`flex-1 h-2 rounded-full ${step >= 3 ? 'bg-green-400' : 'bg-slate-700'}`}></div>
+      {/* Hero */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+        <div className="inline-block bg-green-500/10 border border-green-500/30 rounded-full px-4 py-1 text-green-400 text-sm font-medium mb-6">
+          Revenue Recovery Network for Local Service Businesses
+        </div>
+        <h1 className="text-5xl sm:text-6xl font-extrabold text-white mb-6 leading-tight">
+          Stop Losing Revenue<br />to Missed Calls
+        </h1>
+        <p className="text-xl text-slate-300 max-w-2xl mx-auto mb-10">
+          Respondfall captures the 35–40% of inbound calls your business misses every day and converts that lost revenue into automated recovery sequences.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a
+            href="/signup"
+            className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-10 rounded-lg transition text-lg flex items-center space-x-2"
+          >
+            <span>Start Your Free Trial</span>
+            <ChevronRight className="w-5 h-5" />
+          </a>
+          <a
+            href="/dashboard"
+            className="bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-10 rounded-lg transition text-lg"
+          >
+            View Demo Dashboard
+          </a>
+        </div>
+        <p className="text-slate-500 text-sm mt-4">15-day free trial · No credit card required</p>
+      </div>
+
+      {/* Stats */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-8 text-center">
+            <p className="text-5xl font-extrabold text-green-400 mb-2">35–40%</p>
+            <p className="text-slate-300 font-medium">of inbound calls go unanswered</p>
+            <p className="text-slate-500 text-sm mt-2">That's revenue walking out the door every single day.</p>
+          </div>
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-8 text-center">
+            <p className="text-5xl font-extrabold text-blue-400 mb-2">4 min</p>
+            <p className="text-slate-300 font-medium">to get fully set up</p>
+            <p className="text-slate-500 text-sm mt-2">Self-serve onboarding with automatic number provisioning.</p>
+          </div>
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-8 text-center">
+            <p className="text-5xl font-extrabold text-purple-400 mb-2">70%</p>
+            <p className="text-slate-300 font-medium">average SMS response rate</p>
+            <p className="text-slate-500 text-sm mt-2">AI-qualified leads routed directly to your team.</p>
+          </div>
         </div>
 
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 mb-8 flex items-start space-x-3">
-            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-            <p className="text-red-300">{error}</p>
-          </div>
-        )}
-
-        {step === 1 && (
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-8 mb-8">
-            <h2 className="text-2xl font-bold text-white mb-2">Business Information</h2>
-            <p className="text-slate-400 mb-6">We'll use this to set up your account.</p>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Business Name</label>
-                <input
-                  type="text"
-                  name="businessName"
-                  value={formData.businessName}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Miami HVAC Solutions"
-                  className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-green-400"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Current Business Phone</label>
-                <input
-                  type="tel"
-                  name="businessPhone"
-                  value={formData.businessPhone}
-                  onChange={handleInputChange}
-                  placeholder="(555) 123-4567"
-                  className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-green-400"
-                />
-                <p className="text-xs text-slate-500 mt-2">We'll create a new number that forwards to this one.</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Your Email</label>
-                <input
-                  type="email"
-                  name="ownerEmail"
-                  value={formData.ownerEmail}
-                  onChange={handleInputChange}
-                  placeholder="you@business.com"
-                  className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-green-400"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Choose Your Plan</label>
-                <select
-                  name="tier"
-                  value={formData.tier}
-                  onChange={handleInputChange}
-                  className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-400"
-                >
-                  <option value="starter">Starter - $97/month</option>
-                  <option value="pro">Pro - $197/month (Recommended)</option>
-                  <option value="agency">Agency - $397/month</option>
-                </select>
-              </div>
+        {/* Features */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-8 flex items-start space-x-5">
+            <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Phone className="w-6 h-6 text-green-400" />
             </div>
-
-            <button
-              onClick={handleStepOne}
-              className="w-full mt-8 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg flex items-center justify-center space-x-2 transition"
-            >
-              <span>Continue</span>
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-        )}
-
-        {step === 2 && (
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-8 mb-8">
-            <h2 className="text-2xl font-bold text-white mb-2">Secure Your Account</h2>
-            <p className="text-slate-400 mb-6">Create a password and agree to our terms.</p>
-
-            <div className="space-y-4 mb-8">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  placeholder="Min. 8 characters"
-                  className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-green-400"
-                />
-              </div>
-
-              <div className="flex items-start space-x-3">
-                <input
-                  type="checkbox"
-                  name="agreeTerms"
-                  checked={formData.agreeTerms}
-                  onChange={handleInputChange}
-                  className="mt-1"
-                />
-                <label className="text-sm text-slate-300">
-                  I agree to Respondfall's Terms of Service and Privacy Policy
-                </label>
-              </div>
-            </div>
-
-            <div className="flex space-x-4">
-              <button
-                onClick={() => setStep(1)}
-                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition"
-              >
-                Back
-              </button>
-              <button
-                onClick={handleStepTwo}
-                disabled={loading}
-                className="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-slate-500 text-white font-bold py-3 rounded-lg flex items-center justify-center space-x-2 transition"
-              >
-                <span>{loading ? 'Creating Account...' : 'Create Account'}</span>
-                {!loading && <ChevronRight className="w-5 h-5" />}
-              </button>
+            <div>
+              <h3 className="text-lg font-bold text-white mb-2">Missed Call Recovery</h3>
+              <p className="text-slate-400">Every missed call triggers an automated SMS recovery sequence. No lead slips through the cracks.</p>
             </div>
           </div>
-        )}
-
-        {step === 3 && (
-          <div className="bg-slate-800/50 border border-green-400/50 rounded-lg p-8 text-center mb-8">
-            <div className="w-16 h-16 bg-green-400/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-8 flex items-start space-x-5">
+            <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+              <MessageSquare className="w-6 h-6 text-blue-400" />
             </div>
-
-            <h2 className="text-2xl font-bold text-white mb-2">Account Created!</h2>
-            <p className="text-slate-300 mb-4">Your Respondfall account is ready. We're provisioning your phone number now.</p>
-
-            <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4 mb-6 text-left">
-              <p className="text-sm text-slate-400 mb-2">What happens next:</p>
-              <ol className="text-sm text-slate-300 space-y-2">
-                <li>✓ New local number created and forwarding set up</li>
-                <li>✓ SMS sequences activated</li>
-                <li>✓ Dashboard ready to view incoming calls</li>
-                <li>✓ 15-day free trial starts now</li>
-              </ol>
+            <div>
+              <h3 className="text-lg font-bold text-white mb-2">AI Lead Qualification</h3>
+              <p className="text-slate-400">Intelligent SMS sequences qualify leads automatically and route hot prospects directly to your sales team.</p>
             </div>
+          </div>
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-8 flex items-start space-x-5">
+            <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+              <TrendingUp className="w-6 h-6 text-purple-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white mb-2">Real-Time Revenue Analytics</h3>
+              <p className="text-slate-400">See exactly how much revenue you've protected. One number that makes the ROI undeniable.</p>
+            </div>
+          </div>
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-8 flex items-start space-x-5">
+            <div className="w-12 h-12 bg-orange-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Shield className="w-6 h-6 text-orange-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white mb-2">Automatic Number Provisioning</h3>
+              <p className="text-slate-400">A local number is provisioned for your business instantly via Twilio. Forwarding is set up automatically.</p>
+            </div>
+          </div>
+        </div>
 
-            <p className="text-slate-400 text-sm mb-6">You'll receive an email confirmation and your dashboard login within 1 minute.</p>
-
-            
-              href="/dashboard"
-              className="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition"
-            >
-              Go to Dashboard
+        {/* Pricing */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-extrabold text-white mb-4">Simple, Transparent Pricing</h2>
+          <p className="text-slate-400 max-w-xl mx-auto">Start free for 15 days. No credit card required. Cancel anytime.</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-8">
+            <p className="text-slate-400 text-sm font-medium uppercase mb-2">Starter</p>
+            <p className="text-4xl font-extrabold text-white mb-1">$97<span className="text-lg font-normal text-slate-400">/mo</span></p>
+            <p className="text-slate-500 text-sm mb-6">Missed call SMS + recovery sequences</p>
+            <a href="/signup?tier=starter" className="block w-full text-center bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition">
+              Get Started
             </a>
           </div>
-        )}
+          <div className="bg-slate-800/50 border border-green-500/50 rounded-lg p-8 relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">RECOMMENDED</div>
+            <p className="text-slate-400 text-sm font-medium uppercase mb-2">Pro</p>
+            <p className="text-4xl font-extrabold text-white mb-1">$197<span className="text-lg font-normal text-slate-400">/mo</span></p>
+            <p className="text-slate-500 text-sm mb-6">+ AI qualification + review automation</p>
+            <a href="/signup?tier=pro" className="block w-full text-center bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition">
+              Get Started
+            </a>
+          </div>
+          <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-8">
+            <p className="text-slate-400 text-sm font-medium uppercase mb-2">Agency</p>
+            <p className="text-4xl font-extrabold text-white mb-1">$397<span className="text-lg font-normal text-slate-400">/mo</span></p>
+            <p className="text-slate-500 text-sm mb-6">+ referral automation + full analytics</p>
+            <a href="/signup?tier=agency" className="block w-full text-center bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition">
+              Get Started
+            </a>
+          </div>
+        </div>
 
-        <div className="bg-blue-500/10 border border-blue-500/50 rounded-lg p-6">
-          <p className="text-blue-200 text-sm">
-            <strong>Free trial includes:</strong> Full access to your plan, local number provisioning, SMS sequences, and analytics. No credit card charged until day 15.
-          </p>
+        {/* CTA */}
+        <div className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/50 rounded-lg p-12 text-center">
+          <h2 className="text-3xl font-extrabold text-white mb-4">Ready to Protect Your Revenue?</h2>
+          <p className="text-slate-300 mb-8 max-w-xl mx-auto">Join thousands of local service businesses that never miss a lead. Set up in 4 minutes. Free for 15 days.</p>
+          <a
+            href="/signup"
+            className="inline-flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-10 rounded-lg transition text-lg"
+          >
+            <span>Start Your Free Trial</span>
+            <ChevronRight className="w-5 h-5" />
+          </a>
         </div>
       </div>
     </div>
